@@ -1,0 +1,10 @@
+src/main/app.json
+!src/main/app.sample.json
+
+icon
+guildJSONs
+
+node_modules
+
+.env
+!.env.sample
