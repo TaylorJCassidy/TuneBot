@@ -409,14 +409,6 @@ class MusicPlayerV2  {
                 };
 
                 voiceChannel.client.on('voiceStateUpdate', listener);
-
-                //fix for discord api being borked
-                connection.on('stateChange', (old_state, new_state) => {
-                    if (old_state.status === VoiceConnectionStatus.Ready && new_state.status === VoiceConnectionStatus.Connecting) {
-                        connection.configureNetworking();
-                        logger('Configured networking');
-                    }
-                });
             
                 connection.on(VoiceConnectionStatus.Disconnected, () => {
                     //if real disconnect, catch should be triggered
