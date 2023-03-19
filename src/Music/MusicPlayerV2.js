@@ -226,6 +226,7 @@ class MusicPlayerV2  {
                 this.msg.channel.send(commonResponses.QUEUE_EMPTY);
             }
             else {
+                this.msg.channel.send(':hole: Emptied queue');
                 this.queue = new Queue(configs.MAXQUEUE);
             }
         }
