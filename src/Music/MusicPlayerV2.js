@@ -446,7 +446,7 @@ class MusicPlayerV2  {
                         },configs.RETRYTIMEOUTLENGTH);
                     }
                     else {
-                        logger(this.currentTrack.url + '\n' + e.message);
+                        logger(this.currentTrack.url + ' | ' + e.message);
                         this.audioPlayer.stop();
                         if (this.queue.isEmpty()) {
                             this.msg.channel.send(`:x: Unable to play the track **${this.currentTrack.title}**. Please try again`);
