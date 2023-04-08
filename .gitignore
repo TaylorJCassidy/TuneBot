@@ -1,5 +1,5 @@
-src/main/app.json
-!src/main/app.sample.json
+src/app.json
+!src/app.sample.json
 
 icon
 guildJSONs

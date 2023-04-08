@@ -1,4 +1,4 @@
-const configs = Object.freeze(require('../../config/musicConsts.json'));
+const configs = Object.freeze(require('../app.json'));
 
 class Queue {
     

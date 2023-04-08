@@ -7,7 +7,7 @@ const client = new Client({intents: [
 ]});
 const MusicPlayer = require('./Music/MusicPlayerV2.js');
 
-const {prefix} = require('../config/prefix.json');
+const {prefix} = require('./app.json');
 client.prefix = prefix;
 
 let musicRepo;

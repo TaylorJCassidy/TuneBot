@@ -1,4 +1,5 @@
 {
+    "prefix": ";",
     "LEAVETIMEOUTLENGTH": 30000,
     "MAXQUEUE": 20,
     "RETRYTIMEOUTLENGTH": 1000,

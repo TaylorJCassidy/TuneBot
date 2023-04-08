@@ -5,7 +5,7 @@ const ytsr = require('ytsr');//3.5.3
 
 const parseTime = require('../Utils/parseTime.js');
 const commonResponses = Object.freeze(require('./MusicErrorReponses.json'));
-const configs = Object.freeze(require('../../config/musicConsts.json'));
+const configs = Object.freeze(require('../app.json'));
 const Queue = require('../Utils/Queue.js');
 const logger = require('../Utils/logger.js');
 
