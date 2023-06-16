@@ -1,4 +1,4 @@
-const MusicPlayer = require('../Music/MusicPlayerV2.js');
+const MusicPlayer = require('../Music/MusicPlayer.js');
 
 module.exports = {
     generateMusicRepo: (guilds) => {

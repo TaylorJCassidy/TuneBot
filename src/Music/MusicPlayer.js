@@ -1,34 +1,64 @@
-/* eslint-disable no-unused-vars */
-const Queue = require('../Utils/Queue.js');
-const ytdl = require('ytdl-core');//4.10
-const ytsr = require('ytsr');//3.5.3
+const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioPlayer, createAudioResource, StreamType, AudioPlayerStatus } = require('@discordjs/voice');
+const {MessageButton, MessageActionRow} = require('discord.js');
+const ytdl = require('@distube/ytdl-core');
+const ytsr = require('@distube/ytsr');
+
 const parseTime = require('../Utils/parseTime.js');
 const commonResponses = Object.freeze(require('./MusicErrorReponses.json'));
 const configs = Object.freeze(require('../app.json'));
-
-const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioPlayer } = require('@discordjs/voice');
+const Queue = require('../Utils/Queue.js');
+const logger = require('../Utils/logger.js');
 
 class MusicPlayer {
-
-    REACTS = new Map([
-        ['⏹️',this.stop],
-        ['🔁',this.loop],
-        ['🇶',this.q],
-        ['⏯️',this.togglePaused],
-        ['➡️',this.skip]
-    ]);
-
+ 
     msg;
-    currentTrack;
-    queue = new Queue();
-    connection;
+    buttons;
+    buttonBindings;
     audioPlayer;
-    dispatcher;
-    collector;
+    connection;
+    queue = new Queue(configs.MAXQUEUE);
     isPlaying = false;
     isLooping = false;
+    isPaused = false;
+    collector;
+    currentTrack;
     trackTime;
     leaveTimeout;
+
+    constructor() {
+        this.buttons = new MessageActionRow()
+			.addComponents(
+				new MessageButton()
+					.setCustomId('stop')
+					.setStyle('SECONDARY')
+                    .setEmoji('⏹️'),
+                new MessageButton()
+					.setCustomId('loop')
+					.setStyle('SECONDARY')
+                    .setEmoji('🔁'),
+                new MessageButton()
+					.setCustomId('q')
+					.setStyle('SECONDARY')
+                    .setEmoji('🇶'),
+                new MessageButton()
+					.setCustomId('pause')
+					.setStyle('SECONDARY')
+                    .setEmoji('⏯️'),
+                new MessageButton()
+					.setCustomId('skip')
+					.setStyle('SECONDARY')
+                    .setEmoji('➡️'),
+			);
+
+        this.buttonBindings = new Map([
+            ['stop',this.stop],
+            ['loop',this.loop],
+            ['q',this.q],
+            ['pause',this.togglePaused],
+            ['skip',this.skip]
+        ]);
+
+    }
 
     musicController(msg,cmd,arg) {
         this.msg = msg;
@@ -36,7 +66,7 @@ class MusicPlayer {
             case 'play':
             case 'p':
                 if (arg === '') {
-                    this.togglePaused();
+                    msg.channel.send(this.togglePaused());
                 }
                 else {
                     this.play(arg);
@@ -45,11 +75,11 @@ class MusicPlayer {
             case 'skip':
             case 'fs':
             case 's':
-                this.skip();
+                msg.channel.send(this.skip());
                 break;
             case 'queue':
             case 'q':
-                this.q();
+                msg.channel.send(this.q());
                 break;
             case 'getout':
             case 'fuckoff':
@@ -60,11 +90,11 @@ class MusicPlayer {
                 this.join();
                 break;
             case 'stop':
-                this.stop();
+                msg.channel.send(this.stop());
                 break;
             case 'unpause':
             case 'pause':
-                this.togglePaused();
+                msg.channel.send(this.togglePaused());
                 break;
             case 'song':
             case 'link':
@@ -77,13 +107,10 @@ class MusicPlayer {
                 this.remove(arg);
                 break;
             case 'loop':
-                this.loop();
+                msg.channel.send(this.loop());
                 break;
             case 'looping':
                 this.looping();
-                break;
-            case 'bassboost':
-                this.bassboost(arg);
                 break;
             case 'help':
                 this.help();
@@ -94,87 +121,19 @@ class MusicPlayer {
         return true;
     }
 
-    async play(arg) {
+    async join() {
         if (await this._connect()) {
-            try {
-                let info = {
-                    title: null,
-                    url: null,
-                    length: null
-                };
-
-                if (ytdl.validateURL(arg)) {
-                    const tempinfo = (await ytdl.getBasicInfo(arg,{requestOptions: {headers: {cookie: configs.COOKIE}}})).videoDetails;
-                    info.title = tempinfo.title;
-                    info.url = tempinfo.video_url;
-                    info.length = parseInt(tempinfo.lengthSeconds);
-                }
-                else {
-                    //const url = (await ytsr.getFilters(arg)).get('Type').get('Video').url; PROPER USEAGE HOWEVER SLOWER
-                    const url = `https://www.youtube.com/results?search_query=${arg}&sp=EgIQAQ%253D%253D`;
-                    const tempinfo = (await ytsr(url, { limit: '1' })).items[0];
-                    info.title = tempinfo.title;
-                    info.url = tempinfo.url;
-                    info.length = parseTime.parseTimeString(tempinfo.duration);
-                }
-
-                info.title = info.title.replace(/\*\*/,'\\*\\*');
-
-                if (/nightcore/i.test(info.title)) {
-                    throw new Error('nightcore');
-                }
-
-                if (!this.isPlaying) {
-                    this.isPlaying = true;
-                    clearTimeout(this.leaveTimeout);
-                    this._playMusic(info);
-                    let message = await this.msg.channel.send(`:loud_sound: Now playing: **${info.title}**`);
-                    this._reactionController(message);
-                }
-                else {
-                    if (!this.queue.add(info)) {
-                        this.msg.channel.send(':x: Cannot add to queue, as the queue is currently full');
-                    }
-                    else {
-                        this.msg.channel.send(':white_check_mark: Added **' + info.title + '** to the queue');
-                    }
-                }
-            }
-            catch(e) {
-                this._timeout();
-                this.msg.channel.send(':x: Unable to add this track to the queue');
-                console.log(Date.now() + ': ' + e.message);
-            }
-        }
-        
-    }
-
-    skip() {
-        if (this._isValid()) {
-            if (this.isPlaying) {
-                this.dispatcher.destroy();
-                if (!this.queue.isEmpty()) {
-                    this._playMusic(this.queue.remove());
-                }
-                else {
-                    this.isPlaying = false;
-                    this._timeout();
-                }
-                this.msg.channel.send(':white_check_mark: Track skipped');
-            }
-            else {
-                this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
-            }
+            this._timeout();
         }
     }
 
     q() {
         if (!this.isPlaying) {
-            this.msg.channel.send(':hole: The queue is empty');
+            return ':hole: The queue is empty';
         }
         else {
             let qString = `Current track is: **${this.currentTrack.title}**\n`;
-            const currentTrackLength = parseInt((this.trackTime-Date.now())/1000);
+            const currentTrackLength = parseInt(this.trackTime);
 
             if (!this.queue.isEmpty()) {
                 qString += 'Tracks Currently in queue:\n';
@@ -201,19 +160,7 @@ class MusicPlayer {
                 qString += ':repeat: The track is looping';
             }
 
-            this.msg.channel.send(qString);
-        }
-    }
-
-    leave() {
-        if (this._isValid()) {
-            this.connection.disconnect();
-        }
-    }
-
-    async join() {
-        if (await this._connect()) {
-            this._timeout();
+            return qString;
         }
     }
 
@@ -221,35 +168,42 @@ class MusicPlayer {
         if (this._isValid()) {
             if (this.isPlaying) {
                 this._clearFields();
-                this.msg.channel.send(':stop_button: Stopped');
-                this._timeout();
+                return ':stop_button: Stopped';
             }
             else {
-                this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
+                return commonResponses.NO_TRACK_PLAYING;
             }
         }
     } 
 
     togglePaused() {
         if (this._isValid()) {
+            let tosend;
             if (this.isPlaying) {
-                if (this.dispatcher.paused) {
-                    //WORKAROUND AS SINGULAR PAUSE DOES NOT WORK WITH CURRENT NODEJS AND DISCORDJS
-                    this.dispatcher.resume();
-                    this.dispatcher.pause();
-                    this.dispatcher.resume();
-                    clearTimeout(this.leaveTimeout);
-                    this.msg.channel.send(':arrow_forward: The track has been resumed');
+                if (this.isPaused) {
+                    if (this.audioPlayer.unpause()) {
+                        clearTimeout(this.leaveTimeout);
+                        tosend = ':arrow_forward: The track has been resumed';
+                    }
+                    else {
+                        tosend = 'There has been an error';
+                    }         
                 }
                 else {
-                    this.dispatcher.pause();
-                    this._timeout();
-                    this.msg.channel.send(':pause_button: The track has been paused');
+                    if (this.audioPlayer.pause()) {
+                        this._timeout();
+                        tosend = ':pause_button: The track has been paused';
+                    }
+                    else {
+                        tosend = 'There has been an error';
+                    }
                 }
+                this.isPaused = !this.isPaused;
             }
             else {
-                this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
+                tosend = commonResponses.NO_TRACK_PLAYING;
             }
+            return tosend;
         }
     }
 
@@ -268,7 +222,48 @@ class MusicPlayer {
                 this.msg.channel.send(commonResponses.QUEUE_EMPTY);
             }
             else {
+                this.msg.channel.send(':hole: Emptied queue');
                 this.queue = new Queue(configs.MAXQUEUE);
+            }
+        }
+    }
+
+    loop() {
+        if(this._isValid()) {
+            if (this.isPlaying) {
+                this.isLooping = !this.isLooping;
+                return `:repeat: The track is ${this.isLooping ? 'now':'no longer'} looping`;
+            }
+            else {
+                return commonResponses.NO_TRACK_PLAYING;
+            }
+        }
+    }
+
+    looping() {
+        if (this.isPlaying) {
+            this.msg.channel.send(`The track is ${this.isLooping ? '':'not'} looping`);
+        }
+        else {
+            this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
+        }
+    }
+
+
+    leave() {
+        if (this._isValid()) {
+            this.connection.disconnect();
+        }
+    }
+
+    skip() {
+        if (this._isValid()) {
+            if (this.isPlaying) {
+                this.audioPlayer.stop();
+                return ':white_check_mark: Track skipped';
+            }
+            else {
+                return commonResponses.NO_TRACK_PLAYING;
             }
         }
     }
@@ -295,50 +290,68 @@ class MusicPlayer {
         }
     }
 
-    loop() {
-        if(this._isValid()) {
-            if (this.isPlaying) {
-                this.isLooping = !this.isLooping;
-                this.msg.channel.send(`:repeat: The track is ${this.isLooping ? 'now':'no longer'} looping`);
-            }
-            else {
-                this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
-            }
-        }
-    }
+    async play(arg) {
+        if (await this._connect()) {
+            let info = {
+                title: null,
+                url: null,
+                length: null
+            };
 
-    looping() {
-        if (this.isPlaying) {
-            this.msg.channel.send(`The track is ${this.isLooping ? '':'not'} looping`);
-        }
-        else {
-            this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
-        }
-    }
-
-    bassboost(arg) {
-        if(this._isValid()) {
-            if (this.isPlaying) {
-                const baseFactor = 3;
-                let increase = baseFactor;
-
-                if (arg != '' && arg > 0) {
-                    increase *= arg;
-                }
-
-                if (this.dispatcher.volume+increase > ((configs.MAXBASSBOOST*baseFactor)+1)) {
-                    this.msg.channel.send(`:x: Cannot boost more than ${configs.MAXBASSBOOST} times (for health and safety)`);
+            try {
+                if (ytdl.validateURL(arg)) {
+                    const options = {
+                        requestOptions: {
+                            headers: {cookie: configs.COOKIE}
+                        }
+                    };
+                    const tempinfo = (await ytdl.getBasicInfo(arg,options)).videoDetails;
+                    info.title = tempinfo.title;
+                    info.url = tempinfo.video_url;
+                    info.length = parseInt(tempinfo.lengthSeconds);
                 }
                 else {
-                    this.dispatcher.setVolume(this.dispatcher.volume+increase);
+                    //const url = (await ytsr.getFilters(arg)).get('Type').get('Video').url; PROPER USEAGE HOWEVER SLOWER
+                    const url = `https://www.youtube.com/results?search_query=${arg}&sp=EgIQAQ%253D%253D`;
+                    const tempinfo = (await ytsr(url, { limit: '1' })).items[0];
+                    info.title = tempinfo.name;
+                    info.url = tempinfo.url;
+                    info.length = parseTime.parseTimeString(tempinfo.duration);
+                }
+
+                info.title = info.title.replace(/\*\*/,'\\*\\*');
+                //info.url = info.url.substring(0,info.url.search(/&/));
+
+                if (/(nightcore|chipmunk)/i.test(info.title)) {
+                    throw new Error('nightcore');
+                }
+
+                if (!this.isPlaying) {
+                    this._playMusic(info);
+                    const msgContent = {
+                        content: `:loud_sound: Now playing: **${info.title}**`,
+                        components: [this.buttons]
+                    };
+                    const message = await this.msg.channel.send(msgContent);
+                    this._reactionController(message);
+                    clearTimeout(this.leaveTimeout);
+                }
+                else {
+                    if (!this.queue.add(info)) {
+                        this.msg.channel.send(':x: Cannot add to queue, as the queue is currently full');
+                    }
+                    else {
+                        this.msg.channel.send(':white_check_mark: Added **' + info.title + '** to the queue');
+                    }
                 }
             }
-            else {
-                this.msg.channel.send(commonResponses.NO_TRACK_PLAYING);
+            catch(e) {
+                logger(e.message);
+                this.msg.channel.send(':x: There has been an error, please try again');
             }
         }
     }
-    
+
     help() {
         const p = this.msg.client.prefix;
         this.msg.channel.send(
@@ -357,51 +370,6 @@ class MusicPlayer {
         );
     }
 
-    _playMusic(info,retry = 1) {
-        const stream = ytdl(info.url, { quality: [250,251,249], highWaterMark: 1 << 25, requestOptions: {headers: {cookie: configs.COOKIE}}});
-        this.dispatcher = this.audioPlayer.play(stream,{type: 'webm/opus', bitrate: 'auto'});
-        this.currentTrack = info;
-        this.trackTime = Date.now()+(info.length*1000);
-
-        this.dispatcher.on('finish', () => {
-            this.dispatcher.destroy();
-            if (this.isLooping) {
-                this._playMusic(info);
-            }
-            else if (this.queue.isEmpty()) {
-                this.isPlaying = false;
-                this.isLooping = false;
-                this._timeout();
-            }
-            else {
-                this._playMusic(this.queue.remove());
-            }
-        });
-
-        stream.on('error', (e) => {
-            let time = new Date().toString().substring(0,24);
-            this.dispatcher.destroy();
-            if (e.statusCode == 403 && retry < 3) {
-                console.log(time + `: Retrying, attempt ${retry}:` + info.url);
-                setTimeout(() => {
-                    this._playMusic(info,retry++);
-                },configs.RETRYTIMEOUTLENGTH);
-            }
-            else {
-                console.log(time + ': ' + info.url + '\n' + e.message);
-                if (this.queue.isEmpty()) {
-                    this.msg.channel.send(`:x: Unable to play the track **${info.title}**. Please try again`);
-                    this.isPlaying = false;
-                    this._timeout();
-                }
-                else {
-                    this.msg.channel.send(`:x: Unable to play the track **${info.title}**. Playing next track`);
-                    this._playMusic(this.queue.remove());
-                }
-            }
-        });
-    }
-
     async _connect() {
         return new Promise((resolve) => {
             const voiceChannel = this.msg.member.voice.channel;
@@ -414,101 +382,127 @@ class MusicPlayer {
                 this.msg.channel.send('Cant connect');
                 return resolve(false);
             }
-            /* if (this.connection == undefined || this.connection.status == 4) {
+
+            if (this._isValidConnection()) {
+                return resolve(true);
+            }
+
+            const joinParams = {
+                channelId: voiceChannel.id,
+                guildId: voiceChannel.guildId,
+                adapterCreator: voiceChannel.guild.voiceAdapterCreator
+            };
+
+            const connection = joinVoiceChannel(joinParams);
+            entersState(connection, VoiceConnectionStatus.Ready, 3000).then(() => {
+                this.connection = connection;
+                this.audioPlayer = createAudioPlayer();
+                let retry = 1;
+
                 const listener = (oldState,newState) => {
-                    if (this.connection.channel.members.size == 1) {
+                    if (voiceChannel.members.size == 1) {
                         this.connection.disconnect();
                     }
                 };
 
-                const voiceChannel = this.msg.member.voice.channel;
-                const joinParams = {
-                    channelId: voiceChannel.id,
-                    guildId: voiceChannel.guildId,
-                    adapterCreator: voiceChannel.guild.voiceAdapterCreator
-                };
-
-                this.connection = joinVoiceChannel(joinParams);
-                this.connection.on('disconnect',() => {
-                    this._clearFields();
-                    clearTimeout(this.leaveTimeout);
-                    this.msg.client.removeListener('voiceStateUpdate',listener);
-                });
-
-                this.connection.on('error', (e) => {
-                    this.msg.channel.send(':x: Cannot connect to this channel. Please check permissions and try again');
-                });
-
-                this.listener = this.msg.client.on('voiceStateUpdate', listener);
-                return setTimeout(() => {
-                    return true;
-                },10000);
-            }
-            else {
-                if (this.msg.guild.me.voice.channelID != this.msg.member.voice.channelID) {
-                    this.msg.channel.send(commonResponses.INCORRECT_CHANNEL);
-                    return false;
-                }
-                else {
-                    return true;
-                }
-            } */
-
+                voiceChannel.client.on('voiceStateUpdate', listener);
             
-            const connection = joinVoiceChannel({
-                channelId: voiceChannel.id,
-                guildId: voiceChannel.guildId,
-                adapterCreator: voiceChannel.guild.voiceAdapterCreator
-            });
+                connection.on(VoiceConnectionStatus.Disconnected, () => {
+                    //if real disconnect, catch should be triggered
+                    Promise.race([
+                        entersState(connection, VoiceConnectionStatus.Signalling, configs.DISCONNECTTIMEOUT),
+                        entersState(connection, VoiceConnectionStatus.Connecting, configs.DISCONNECTTIMEOUT),
+                    ]).catch(() => {
+                        this.audioPlayer.removeAllListeners();
+                        this._clearFields();
+                        this.connection.destroy();
+                        this.msg.client.removeListener('voiceStateUpdate',listener);
+                    });
+                });
+                
+                this.audioPlayer.on(AudioPlayerStatus.Idle, () => {
+                    if (this.isLooping) {
+                        this._playMusic(this.currentTrack);
+                    }
+                    else if (this.queue.isEmpty()) {
+                        this.isPlaying = false;
+                        this._timeout();
+                    }
+                    else {
+                        this._playMusic(this.queue.remove());
+                    }
+                });
 
-            entersState(connection, VoiceConnectionStatus.Ready, 3000).then(() => {
-                this.connection = connection;
-                createAudioPlayer();
+                this.audioPlayer.on('error', (e) => {
+                    logger('=========== SOMETHING WENT WRONG ===========');
+                    if (e.message == 'Status code: 403' && retry <= configs.MAXRETRIES) {
+                        logger(`Retrying, attempt ${retry}/${configs.MAXRETRIES}: ` + this.currentTrack.url);
+                        setTimeout(() => {
+                            this._playMusic(this.currentTrack,retry++);
+                        },configs.RETRYTIMEOUTLENGTH);
+                    }
+                    else {
+                        logger(this.currentTrack.url + ' | ' + e.message);
+                        this.audioPlayer.stop();
+                        if (this.queue.isEmpty()) {
+                            this.msg.channel.send(`:x: Unable to play the track **${this.currentTrack.title}**. Please try again`);
+                        }
+                        else {
+                            this.msg.channel.send(`:x: Unable to play the track **${this.currentTrack.title}**. Playing next track`);
+                        }
+                    }
+                    logger('============================================');
+                });
+
+                connection.subscribe(this.audioPlayer);
                 resolve(true);
             })
             .catch((e) => {
                 this.msg.channel.send('Unable to join channel, please try again');
-                console.log(e);
+                logger(e);
                 resolve(false);
             });
-            
         });
     }
 
+    _isValidConnection() {
+        return this.connection && this.connection.state.status == VoiceConnectionStatus.Ready;
+    }
+
+    _playMusic(info) {
+        this.isPlaying = true;
+        const options = { 
+            quality: [250,251,249],
+            highWaterMark: 1 << 25,
+            requestOptions: {
+                headers: {cookie: configs.COOKIE}
+            }
+        };
+        const stream = ytdl(info.url, options);
+        this.audioPlayer.play(createAudioResource(stream,{inputType: StreamType.WebmOpus}));   
+        this.currentTrack = info;
+        this.trackTime = info.length;
+        //all error handling is part of _connect
+    }
+    
     _reactionController(msg) {
         if (this.collector && !this.collector.ended) {
             this.collector.stop();
         }
-        
-        this.REACTS.forEach(async (value,key) => {
-            await msg.react(key);
+
+        const filter = (buttonClick,user) => {
+            return user.id != msg.client.user.id;
+        };
+        this.collector = msg.createMessageComponentCollector({filter: filter, componentType: 'BUTTON', dispose: true});
+
+        this.collector.on('collect', i => {
+            i.deferUpdate();
+            i.channel.send(`${i.user.toString()}, ${this.buttonBindings.get(i.customId).call(this)}`);
         });
 
-        this.collector = msg.createReactionCollector((reaction,user) => {
-            return this.REACTS.has(reaction.emoji.name) && user.id != msg.client.user.id;
-        },{dispose: true});
-
-        this.collector.on('collect',async (reaction,user) => {
-            msg.channel.send(`${user.toString()},`);
-            this.REACTS.get(reaction.emoji.name).bind(this)();
-            reaction.users.remove(user);
+        this.collector.on('end', collected => {
+            msg.edit({components: []});
         });
-
-        this.collector.on('end',async () => {
-            msg.reactions.removeAll();
-        });
-    }
-
-    _clearFields() {
-        if (this.dispatcher && !this.dispatcher.destroyed) {
-            this.dispatcher.destroy();
-        }
-        this.queue = new Queue();
-        this.isPlaying = false;
-        this.isLooping = false;
-        if (this.collector && !this.collector.ended) {
-            this.collector.stop();
-        }
     }
 
     _timeout() {
@@ -529,6 +523,19 @@ class MusicPlayer {
         }
         return false;
     }
+
+    _clearFields() {
+        this.queue = new Queue();
+        this.isPlaying = false;
+        this.isLooping = false;
+        this.isPaused = false;
+        this.audioPlayer.stop(true);
+
+        if (this.collector && !this.collector.ended) {
+            this.collector.stop();
+        }
+    }
+
 }
 
 module.exports = MusicPlayer;

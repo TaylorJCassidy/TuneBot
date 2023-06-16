@@ -5,7 +5,7 @@ const client = new Client({intents: [
     Intents.FLAGS.GUILD_MESSAGES,
     Intents.FLAGS.GUILD_VOICE_STATES
 ]});
-const MusicPlayer = require('./Music/MusicPlayerV2.js');
+const MusicPlayer = require('./Music/MusicPlayer.js');
 
 const {prefix} = require('./app.json');
 client.prefix = prefix;

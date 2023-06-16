@@ -10,10 +10,10 @@
   "dependencies": {
     "@discordjs/opus": "^0.8.0",
     "@discordjs/voice": "^0.15.0",
+    "@distube/ytdl-core": "^4.11.10",
+    "@distube/ytsr": "^1.1.9",
     "discord.js": "^13.9.2",
-    "libsodium-wrappers": "^0.7.10",
-    "ytdl-core": "^4.10.0",
-    "ytsr": "^3.8.0"
+    "libsodium-wrappers": "^0.7.10"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",
