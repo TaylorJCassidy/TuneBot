@@ -1,6 +1,7 @@
 FROM node:18-alpine
 ENV NODE_ENV=production
+WORKDIR /tunebot
 COPY package*.json ./
 RUN npm ci
 COPY ./src ./src
-CMD ["node","./src/index.js"]
+CMD ["npm", "run", "start:ci"]
