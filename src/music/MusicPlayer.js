@@ -3,11 +3,11 @@ const {ButtonBuilder, ActionRowBuilder, ButtonStyle} = require('discord.js');
 const ytdl = require('@distube/ytdl-core');
 const ytsr = require('@distube/ytsr');
 
-const parseTime = require('../Utils/parseTime.js');
+const parseTime = require('../utils/parseTime.js');
 const commonResponses = Object.freeze(require('./MusicErrorReponses.json'));
 const configs = Object.freeze(require('../app.json'));
-const Queue = require('../Utils/Queue.js');
-const logger = require('../Utils/logger.js');
+const Queue = require('../utils/Queue.js');
+const logger = require('../utils/logger.js');
 
 class MusicPlayer {
  
