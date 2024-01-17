@@ -7,7 +7,7 @@ const parseTime = require('../utils/parseTime.js');
 const commonResponses = Object.freeze(require('./MusicErrorReponses.json'));
 const configs = Object.freeze(require('../app.json'));
 const Queue = require('../utils/Queue.js');
-const logger = require('../utils/logger.js');
+const logger = require('../utils/logger.js')('MusicPlayer');
 
 class MusicPlayer {
  
