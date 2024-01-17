@@ -1,5 +1,5 @@
 const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioPlayer, createAudioResource, StreamType, AudioPlayerStatus } = require('@discordjs/voice');
-const {MessageButton, MessageActionRow} = require('discord.js');
+const {ButtonBuilder, ActionRowBuilder, ButtonStyle} = require('discord.js');
 const ytdl = require('@distube/ytdl-core');
 const ytsr = require('@distube/ytsr');
 
@@ -26,27 +26,27 @@ class MusicPlayer {
     leaveTimeout;
 
     constructor() {
-        this.buttons = new MessageActionRow()
+        this.buttons = new ActionRowBuilder()
 			.addComponents(
-				new MessageButton()
+				new ButtonBuilder()
 					.setCustomId('stop')
-					.setStyle('SECONDARY')
+					.setStyle(ButtonStyle.Secondary)
                     .setEmoji('⏹️'),
-                new MessageButton()
+                new ButtonBuilder()
 					.setCustomId('loop')
-					.setStyle('SECONDARY')
+					.setStyle(ButtonStyle.Secondary)
                     .setEmoji('🔁'),
-                new MessageButton()
+                new ButtonBuilder()
 					.setCustomId('q')
-					.setStyle('SECONDARY')
+					.setStyle(ButtonStyle.Secondary)
                     .setEmoji('🇶'),
-                new MessageButton()
+                new ButtonBuilder()
 					.setCustomId('pause')
-					.setStyle('SECONDARY')
+					.setStyle(ButtonStyle.Secondary)
                     .setEmoji('⏯️'),
-                new MessageButton()
+                new ButtonBuilder()
 					.setCustomId('skip')
-					.setStyle('SECONDARY')
+					.setStyle(ButtonStyle.Secondary)
                     .setEmoji('➡️'),
 			);
 
@@ -305,7 +305,7 @@ class MusicPlayer {
                             headers: {cookie: configs.COOKIE}
                         }
                     };
-                    const tempinfo = (await ytdl.getBasicInfo(arg,options)).videoDetails;
+                    const tempinfo = (await ytdl.getBasicInfo(arg)).videoDetails;
                     info.title = tempinfo.title;
                     info.url = tempinfo.video_url;
                     info.length = parseInt(tempinfo.lengthSeconds);
@@ -330,10 +330,10 @@ class MusicPlayer {
                     this._playMusic(info);
                     const msgContent = {
                         content: `:loud_sound: Now playing: **${info.title}**`,
-                        components: [this.buttons]
+                        // components: [this.buttons]
                     };
                     const message = await this.msg.channel.send(msgContent);
-                    this._reactionController(message);
+                    // this._reactionController(message);
                     clearTimeout(this.leaveTimeout);
                 }
                 else {
@@ -515,7 +515,7 @@ class MusicPlayer {
         if (!this.msg.member.voice.channel) {
             this.msg.channel.send(commonResponses.NOT_CONNECTED);
         }
-        else if (this.msg.guild.me.voice.channelID != this.msg.member.voice.channelID) {
+        else if (this.msg.guild.members.me.voice.channelID != this.msg.member.voice.channelID) {
             this.msg.channel.send(commonResponses.INCORRECT_CHANNEL);
         }
         else {

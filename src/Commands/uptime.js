@@ -16,4 +16,4 @@ module.exports = {
 
         msg.reply(timeOut);
     }
-}
+};

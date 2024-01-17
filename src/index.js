@@ -1,9 +1,9 @@
-const {Client} = require('discord.js'); //13.9.2
-const {Intents} = require('discord.js');
+const {Client, GatewayIntentBits, ChannelType} = require('discord.js'); //13.9.2
 const client = new Client({intents: [
-    Intents.FLAGS.GUILDS,
-    Intents.FLAGS.GUILD_MESSAGES,
-    Intents.FLAGS.GUILD_VOICE_STATES
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.MessageContent
 ]});
 const MusicPlayer = require('./Music/MusicPlayer.js');
 
@@ -30,7 +30,7 @@ client.on('guildCreate', (guild) => {
 });
 
 client.on('messageCreate', msg => {
-    if (msg.author.id != client.user.id && msg.channel.type == 'GUILD_TEXT') {
+    if (msg.author.id != client.user.id && msg.channel.type === ChannelType.GuildText) {
         if (msg.content.startsWith(prefix) && msg.content.length > prefix.length) {
             const cmd = msg.content.slice(prefix.length).trim().match(/^([^ ]+(?= )*)/)[0];
             const arg = msg.content.substring(cmd.length+2).trim();
