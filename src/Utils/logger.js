@@ -1,4 +1,5 @@
-module.exports = (message) => {
-    const time = new Date().toString().substring(0,24);
-    console.log(`${time}: ` + message);
+module.exports = (where) => {
+    return (log, level = 'info') => {
+        console[level](`${new Date().toISOString()} - ${level.toUpperCase()} - ${where} :`, log);
+    };
 };

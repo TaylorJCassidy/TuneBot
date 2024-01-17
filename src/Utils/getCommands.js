@@ -1,23 +1,26 @@
-module.exports = {
-    /**
-     * Returns all the commands from the commands directory as a map
-     * @returns {Map<String,Object>} The commands, with the command name and associated aliases as keys and command objects as values.
-     */
-    getCommands: () => {
-        const fs = require('fs');
-        const files = fs.readdirSync(`./src/Commands`);
-        const commands = new Map();
+const path = require('path');
+const fs = require('fs');
+const logger = require('./logger');
 
-        for (const file of files) {
-            const command = require(`../Commands/${file}`);
-            commands.set(command.name,command);
-            //if command has aliases, adds alias as a different key to same command object
-            if (command.aliases !== undefined) {
-                command.aliases.forEach(alias => {
-                    commands.set(alias,command);
-                });
+const files = fs.readdirSync(path.resolve(__dirname, '../commands'), {withFileTypes: true});
+const commands = new Map();
+const log = logger('getCommands');
+
+for (const file of files) {
+    if (file.isDirectory()) continue;
+    const command = require(`../commands/${file.name}`);
+    commands.set(command.name, command);
+    //if command has aliases, adds alias as a different key to same command object
+    if (command.aliases !== undefined) {
+        command.aliases.forEach((alias) => {
+            if (commands.get(alias)) {
+                log(`Found clashing alias '${alias}'`, 'warn');
             }
-        }
-        return commands;
+            else {
+                commands.set(alias, command);
+            }
+        });
     }
-};
+}
+
+module.exports = commands;
