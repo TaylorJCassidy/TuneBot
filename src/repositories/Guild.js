@@ -1,6 +1,9 @@
-const MusicPlayer = require('../music/MusicPlayer');
+const queue = require("../music/queue");
 
 module.exports = (guildID) => ({
     guildID,
-    musicController: new MusicPlayer().musicController
+    currentTrack: null,
+    trackQueue: queue,
+    isLooping: false,
+    isPlaying: false
 });

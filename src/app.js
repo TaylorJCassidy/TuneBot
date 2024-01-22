@@ -23,15 +23,15 @@ module.exports = (client) => {
     client.on('messageCreate', msg => {
         if (msg.author.id != client.user.id && msg.channel.type === ChannelType.GuildText) {
             if (msg.content.startsWith(prefix) && msg.content.length > prefix.length) {
-                const cmd = msg.content.slice(prefix.length).trim().match(/^([^ ]+(?= )*)/)[0];
-                const arg = msg.content.substring(cmd.length+2).trim();
+                const content = msg.content.slice(prefix.length);
+                const split = content.search(/ |$/);
+                const command = content.substring(0, split).toLowerCase();
+                const args = content.substring(split+1).trim();
 
                 const guild = GuildRepoManager.getGuild(msg.guild.id);
                 
-                if (!guild.musicController(msg,cmd,arg)) {
-                    if (commands.has(cmd)) {
-                        commands.get(cmd).run(msg,arg);
-                    }
+                if (commands.has(command)) {
+                    commands.get(command).run(msg, args, {guild});
                 }
             }
             else if (msg.mentions.has(client.user.id) && !msg.mentions.everyone) {

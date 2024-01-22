@@ -1,0 +1,8 @@
+{
+    "DISCONNECT_TIMEOUT": 3000,
+    "LEAVE_TIMEOUT": 30000,
+    "NOT_IN_CHANNEL": "Not in voice channel!",
+    "UNABLE_TO_CONNECT": "Unable to join the voice channel!",
+    "FAILED_TO_CONNECT": "Failed to join the voice channel, please try again!",
+    "IN_ANOTHER_CHANNEL": ""
+}
