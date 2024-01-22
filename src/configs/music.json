@@ -1,8 +1,10 @@
 {
     "DISCONNECT_TIMEOUT": 3000,
     "LEAVE_TIMEOUT": 30000,
+    "INITIAL_SEARCH_SIZE": 3,
+    "SEARCH_RETRY_LIMIT": 3,
     "NOT_IN_CHANNEL": "Not in voice channel!",
     "UNABLE_TO_CONNECT": "Unable to join the voice channel!",
     "FAILED_TO_CONNECT": "Failed to join the voice channel, please try again!",
-    "IN_ANOTHER_CHANNEL": ""
+    "UNABLE_TO_FIND_VIDEO": "Unable to find any video with that search!"
 }
