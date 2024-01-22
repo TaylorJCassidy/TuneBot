@@ -1,7 +1,6 @@
-const {joinVoiceChannel, getVoiceConnection, entersState, VoiceConnectionStatus, createAudioPlayer} = require('@discordjs/voice');
-const player = require('../music/player');
+const {joinVoiceChannel, getVoiceConnection, entersState, VoiceConnectionStatus} = require('@discordjs/voice');
 const config = require('../configs/music.json');
-const queue = require('./queue');
+const createCustomAudioPlayer = require('./createCustomAudioPlayer');
 const logger = require('../utils/logger')('join');
 
 module.exports = (voiceChannel, guild) => {
@@ -18,6 +17,10 @@ module.exports = (voiceChannel, guild) => {
 
         const connection = joinVoiceChannel(joinParams);
         entersState(connection, VoiceConnectionStatus.Ready, 3000).then(() => {
+            const audioPlayer = createCustomAudioPlayer(guild);
+            connection.subscribe(audioPlayer);
+            guild.audioPlayer = audioPlayer;
+
             const disconnectListener = () => voiceChannel.members.size == 1 && connection.disconnect();
             voiceChannel.client.on('voiceStateUpdate', disconnectListener);
 
@@ -29,6 +32,7 @@ module.exports = (voiceChannel, guild) => {
                 ]).catch(() => {
                     voiceChannel.client.removeListener('voiceStateUpdate', disconnectListener);
                     clearTimeout(guild.leaveTimeout);
+                    audioPlayer.stop();
                     connection.destroy();
                 });
             });
