@@ -1,5 +1,7 @@
+const createCustomAudioPlayer = require("../music/createCustomAudioPlayer");
+
 module.exports = (guildID) => ({
     guildID,
     leaveTimeout: null,
-    audioPlayer: null
+    audioPlayer: createCustomAudioPlayer(this)
 });

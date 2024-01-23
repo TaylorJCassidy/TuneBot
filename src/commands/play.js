@@ -44,7 +44,7 @@ module.exports = {
                     }
                 }
 
-                if (guild.audioPlayer.getQueue().length == 1) {
+                if (guild.audioPlayer.queue.length == 1) {
                     msg.channel.send(config.PLAYING.replace('1', track.title));
                 }
                 else {

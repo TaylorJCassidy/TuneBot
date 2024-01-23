@@ -54,7 +54,7 @@ module.exports = (guild) => {
     return {
         enqueue,
         skip,
-        getQueue: () => queue,
+        queue,
         __proto__: audioPlayer
     };
 };

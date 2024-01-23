@@ -17,9 +17,7 @@ module.exports = (voiceChannel, guild) => {
 
         const connection = joinVoiceChannel(joinParams);
         entersState(connection, VoiceConnectionStatus.Ready, 3000).then(() => {
-            const audioPlayer = createCustomAudioPlayer(guild);
-            connection.subscribe(audioPlayer);
-            guild.audioPlayer = audioPlayer;
+            connection.subscribe(guild.audioPlayer);
 
             const disconnectListener = () => voiceChannel.members.size == 1 && connection.disconnect();
             voiceChannel.client.on('voiceStateUpdate', disconnectListener);
@@ -32,7 +30,7 @@ module.exports = (voiceChannel, guild) => {
                 ]).catch(() => {
                     voiceChannel.client.removeListener('voiceStateUpdate', disconnectListener);
                     clearTimeout(guild.leaveTimeout);
-                    audioPlayer.stop();
+                    guild.audioPlayer.stop();
                     connection.destroy();
                 });
             });
