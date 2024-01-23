@@ -1,0 +1,14 @@
+const config = require('../configs/music.json');
+
+module.exports = {
+    name: 'skip',
+    aliases: ['s', 'fs'],
+    run: function(msg, args, {guild}) {
+        if (guild.audioPlayer.skip()) {
+            msg.channel.send(config.SKIPPED);
+        }
+        else {
+            msg.channel.send(config.NO_SONG_TO_SKIP);
+        }
+    }
+};

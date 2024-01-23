@@ -44,11 +44,11 @@ module.exports = {
                     }
                 }
 
-                if (!guild.audioPlayer.isPlaying) {
-                    msg.channel.send(`:loud_sound: Now playing: **${track.title}**`);
+                if (guild.audioPlayer.getQueue().length == 1) {
+                    msg.channel.send(config.PLAYING.replace('1', track.title));
                 }
                 else {
-                    msg.channel.send(`:white_check_mark: Added **${track.title}** to the queue`);
+                    msg.channel.send(config.QUEUED.replace('1', track.title));
                 }
             })
             .catch((err) => {

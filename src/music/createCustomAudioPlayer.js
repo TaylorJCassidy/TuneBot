@@ -5,16 +5,14 @@ const timeout = require('./timeout');
 const audioPlayer = createAudioPlayer();
 
 const options = { 
-    quality: [250,251,249],
+    quality: [171, 249, 250, 251], //https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
     highWaterMark: 1 << 24
 };
 
 const queue = [];
-let isPlaying = false;
 
 module.exports = (guild) => {
     const play = (track) => {
-        isPlaying = true;
         const stream = ytdl(track.url, options);
         audioPlayer.play(createAudioResource(stream, {inputType: StreamType.WebmOpus}));
     };
@@ -30,7 +28,6 @@ module.exports = (guild) => {
                 playHeadOfQueue();
             }
             else {
-                isPlaying = false;
                 timeout(guild);
             }
         });
@@ -38,17 +35,26 @@ module.exports = (guild) => {
 
     const enqueue = (track) => {
         queue.push(track);
-        if(!isPlaying) {
+        if(audioPlayer.state.status != AudioPlayerStatus.Playing) {
             clearTimeout(guild.timeout);
             playHeadOfQueue();
         }
+    };
+
+    const skip = () => {
+        if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
+            audioPlayer.stop();
+            return true;
+        }
+        return false;
     };
 
     player();
 
     return {
         enqueue,
-        queue,
+        skip,
+        getQueue: () => queue,
         __proto__: audioPlayer
     };
 };

@@ -6,5 +6,9 @@
     "NOT_IN_CHANNEL": "Not in voice channel!",
     "UNABLE_TO_CONNECT": "Unable to join the voice channel!",
     "FAILED_TO_CONNECT": "Failed to join the voice channel, please try again!",
-    "UNABLE_TO_FIND_VIDEO": "Unable to find any video with that search!"
+    "UNABLE_TO_FIND_VIDEO": "Unable to find any video with that search!",
+    "SKIPPED": "Skipped!",
+    "NO_SONG_TO_SKIP": "Skipped!",
+    "PLAYING": ":loud_sound: Now playing: **1**",
+    "QUEUED": ":white_check_mark: Added **1** to the queue"
 }
