@@ -10,5 +10,8 @@
     "SKIPPED": "Skipped!",
     "NO_SONG_TO_SKIP": "Skipped!",
     "PLAYING": ":loud_sound: Now playing: **1**",
-    "QUEUED": ":white_check_mark: Added **1** to the queue"
+    "QUEUED": ":white_check_mark: Added **1** to the queue",
+    "EMPTY_QUEUE": ":hole: The queue is empty",
+    "CURRENT_TRACK_QUEUE": "Current track is: **1**\n",
+    "TRACKS_IN_QUEUE": "Tracks currently in queue:\n"
 }
