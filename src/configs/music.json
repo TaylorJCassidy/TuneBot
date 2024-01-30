@@ -10,7 +10,7 @@
     "ALREADY_IN_CHANNEL": "Already in another voice channel!",
     "UNABLE_TO_FIND_VIDEO": "Unable to find any video with that search!",
     "SKIPPED": "Skipped!",
-    "NO_SONG_TO_SKIP": "Skipped!",
+    "NO_CURRENT_TRACK": "No track is currently playing",
     "PLAYING": ":loud_sound: Now playing: **1**",
     "QUEUED": ":white_check_mark: Added **1** to the queue",
     "EMPTY_QUEUE": ":hole: The queue is empty",
@@ -19,5 +19,8 @@
     "NOW_LOOPING": "Track is **now** looping",
     "NO_LONGER_LOOPING": "Track is **no longer** looping",
     "CURRENTLY_LOOPING": "Current track **is** looping",
-    "NOT_LOOPING": "Current track **is not** looping"
+    "NOT_LOOPING": "Current track **is not** looping",
+    "STOPPED": "Stopped",
+    "QUEUE_CLEARED": "Cleared queue",
+    "QUEUE_ALREADY_CLEAR": "Queue is already clear"
 }

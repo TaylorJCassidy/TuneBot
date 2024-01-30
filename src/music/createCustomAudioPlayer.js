@@ -62,6 +62,23 @@ module.exports = (guild) => {
         audioPlayer.stop(true);
     };
 
+    const clear = () => {
+        if (queue.length > 1) {
+            queue.length = 1;
+            return true;
+        }
+        return false;
+    };
+
+    const stop = () => {
+        if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
+            queue.length = 0; //empty queue
+            audioPlayer.stop();
+            return true;
+        }
+        return false;
+    };
+
     audioPlayer.on(AudioPlayerStatus.Idle, audioPlayerIdleListener);
 
     return {
@@ -70,6 +87,8 @@ module.exports = (guild) => {
         toggleLooping,
         isLooping: () => isLooping,
         destroy,
+        clear,
+        stop,
         queue,
         __proto__: audioPlayer
     };

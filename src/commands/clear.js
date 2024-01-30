@@ -2,15 +2,14 @@ const config = require('../configs/music.json');
 const valid = require('../music/valid');
 
 module.exports = {
-    name: 'skip',
-    aliases: ['s', 'fs'],
+    name: 'clear',
     run: function(msg, args, {guild}) {
         if (valid(msg, guild)) {
-            if (guild.audioPlayer.skip()) {
-                msg.channel.send(config.SKIPPED);
+            if (guild.audioPlayer.clear()) {
+                msg.channel.send(config.QUEUE_CLEARED);
             }
             else {
-                msg.channel.send(config.NO_CURRENT_TRACK);
+                msg.channel.send(config.QUEUE_ALREADY_CLEAR);
             }
         }
         else msg.channel.send(config.NOT_IN_CHANNEL);
