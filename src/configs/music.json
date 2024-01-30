@@ -1,4 +1,5 @@
 {
+    "JOIN_TIMEOUT": 3000,
     "DISCONNECT_TIMEOUT": 3000,
     "LEAVE_TIMEOUT": 30000,
     "INITIAL_SEARCH_SIZE": 3,
@@ -6,6 +7,7 @@
     "NOT_IN_CHANNEL": "Not in voice channel!",
     "UNABLE_TO_CONNECT": "Unable to join the voice channel!",
     "FAILED_TO_CONNECT": "Failed to join the voice channel, please try again!",
+    "ALREADY_IN_CHANNEL": "Already in another voice channel!",
     "UNABLE_TO_FIND_VIDEO": "Unable to find any video with that search!",
     "SKIPPED": "Skipped!",
     "NO_SONG_TO_SKIP": "Skipped!",
