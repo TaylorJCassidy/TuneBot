@@ -10,6 +10,7 @@ const options = {
 };
 
 const queue = [];
+let isLooping = false;
 
 module.exports = (guild) => {
     const play = (track) => {
@@ -23,12 +24,17 @@ module.exports = (guild) => {
     
     const player = () => {
         audioPlayer.on(AudioPlayerStatus.Idle, () => {
-            queue.shift();
-            if (queue.length > 0) {
+            if (isLooping) {
                 playHeadOfQueue();
             }
             else {
-                timeout(guild);
+                queue.shift();
+                if (queue.length > 0) {
+                    playHeadOfQueue();
+                }
+                else {
+                    timeout(guild);
+                }
             }
         });
     };
@@ -49,11 +55,18 @@ module.exports = (guild) => {
         return false;
     };
 
+    const toggleLooping = () => {
+        isLooping = !isLooping;
+        return isLooping;
+    };
+
     player();
 
     return {
         enqueue,
         skip,
+        toggleLooping,
+        isLooping: () => isLooping,
         queue,
         __proto__: audioPlayer
     };
