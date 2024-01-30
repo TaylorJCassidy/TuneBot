@@ -5,7 +5,7 @@ module.exports = {
     aliases: ['q'],
     run: function(msg, args, {guild}) {
         let content = '';
-        if (guild.audioPlayer.queue.length == 0) {
+        if (guild.audioPlayer == null || guild.audioPlayer.queue.length == 0) {
             content = config.EMPTY_QUEUE;
         }
         else {

@@ -2,17 +2,16 @@ const { createAudioResource, createAudioPlayer, StreamType, AudioPlayerStatus } 
 const ytdl = require('@distube/ytdl-core');
 const timeout = require('./timeout');
 
-const audioPlayer = createAudioPlayer();
-
 const options = { 
     quality: [171, 249, 250, 251], //https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
     highWaterMark: 1 << 24
 };
 
-const queue = [];
-let isLooping = false;
-
 module.exports = (guild) => {
+    const audioPlayer = createAudioPlayer();
+    const queue = [];
+    let isLooping = false;
+
     const play = (track) => {
         const stream = ytdl(track.url, options);
         audioPlayer.play(createAudioResource(stream, {inputType: StreamType.WebmOpus}));
@@ -21,22 +20,20 @@ module.exports = (guild) => {
     const playHeadOfQueue = () => {
         play(queue[0]);
     };
-    
-    const player = () => {
-        audioPlayer.on(AudioPlayerStatus.Idle, () => {
-            if (isLooping) {
+
+    const audioPlayerIdleListener = () => {
+        if (isLooping) {
+            playHeadOfQueue();
+        }
+        else {
+            queue.shift();
+            if (queue.length > 0) {
                 playHeadOfQueue();
             }
             else {
-                queue.shift();
-                if (queue.length > 0) {
-                    playHeadOfQueue();
-                }
-                else {
-                    timeout(guild);
-                }
+                timeout(guild);
             }
-        });
+        }
     };
 
     const enqueue = (track) => {
@@ -60,13 +57,19 @@ module.exports = (guild) => {
         return isLooping;
     };
 
-    player();
+    const destroy = () => {
+        audioPlayer.removeListener(AudioPlayerStatus.Idle, audioPlayerIdleListener);
+        audioPlayer.stop(true);
+    };
+
+    audioPlayer.on(AudioPlayerStatus.Idle, audioPlayerIdleListener);
 
     return {
         enqueue,
         skip,
         toggleLooping,
         isLooping: () => isLooping,
+        destroy,
         queue,
         __proto__: audioPlayer
     };
