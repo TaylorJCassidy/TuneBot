@@ -22,5 +22,7 @@
     "NOT_LOOPING": "Current track **is not** looping",
     "STOPPED": "Stopped",
     "QUEUE_CLEARED": "Cleared queue",
-    "QUEUE_ALREADY_CLEAR": "Queue is already clear"
+    "QUEUE_ALREADY_CLEAR": "Queue is already clear",
+    "INVALID_REMOVE_INDEX": "Not a valid queue position",
+    "REMOVED_FROM_QUEUE": "Removed **1** from queue"
 }
