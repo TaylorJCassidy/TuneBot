@@ -9,18 +9,18 @@ module.exports = {
         });
     },
 
-    addGuild: (guildID) => {
-        const guild = createGuild(guildID);
-        guildsMap.set(guildID, guild);
+    addGuild: (guildId) => {
+        const guild = createGuild(guildId);
+        guildsMap.set(guildId, guild);
     },
 
-    getGuild: (guildID) => {
-        return guildsMap.get(guildID);
+    getGuild: (guildId) => {
+        return guildsMap.get(guildId);
     },
 
-    deleteGuild: (guildID) => {
-        const guild = guildsMap.get(guildID);
+    deleteGuild: (guildId) => {
+        const guild = guildsMap.get(guildId);
         guild.deleteGuild();
-        guildsMap.delete(guildID);
+        guildsMap.delete(guildId);
     }
 };
