@@ -1,7 +1,7 @@
 const commands = require('./utils/getCommands.js');
 const {ChannelType} = require('discord.js');
-const {prefix} = require('./app.json');
-const GuildRepoManager = require('./repositories/GuildRepoManager.js');
+const prefix = process.env.PREFIX;
+const GuildRepoManager = require('./guild/GuildRepoManager.js');
 
 module.exports = (client) => {
     client.once('ready', () => {

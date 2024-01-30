@@ -1,9 +1,8 @@
-const { EmbedBuilder } = require("discord.js");
-const { prefix: p } = require('../app.json');
+const p = process.env.PREFIX;
 
 module.exports = {
     name: 'help',
-    run: function(msg, args, {guild}) {
+    run: function(msg, args) {
         const content = 
             `${p}play      Searches and plays a track from Youtube\
             \n${p}skip      Skips the current track\
