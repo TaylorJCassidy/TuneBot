@@ -1,6 +1,6 @@
 const { createAudioResource, createAudioPlayer, StreamType, AudioPlayerStatus } = require("@discordjs/voice");
 const ytdl = require('@distube/ytdl-core');
-const timeout = require('./timeout');
+const {timeout, cancelTimeout} = require('./timeout');
 
 const options = { 
     quality: [171, 249, 250, 251], //https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
@@ -11,9 +11,11 @@ module.exports = (guild) => {
     const audioPlayer = createAudioPlayer();
     const queue = [];
     let isLooping = false;
+    let songStartedTimestamp;
 
     const play = (track) => {
         const stream = ytdl(track.url, options);
+        songStartedTimestamp = Date.now();
         audioPlayer.play(createAudioResource(stream, {inputType: StreamType.WebmOpus}));
     };
     
@@ -39,7 +41,7 @@ module.exports = (guild) => {
     const enqueue = (track) => {
         queue.push(track);
         if(audioPlayer.state.status != AudioPlayerStatus.Playing) {
-            clearTimeout(guild.timeout);
+            cancelTimeout(guild);
             playHeadOfQueue();
         }
     };
@@ -79,6 +81,18 @@ module.exports = (guild) => {
         return false;
     };
 
+    const togglePaused = () => {
+        if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
+            audioPlayer.pause();
+            timeout(guild);
+        }
+        else {
+            cancelTimeout(guild);
+            audioPlayer.unpause();
+        }
+        return audioPlayer.state.status == AudioPlayerStatus.Paused;
+    };
+
     audioPlayer.on(AudioPlayerStatus.Idle, audioPlayerIdleListener);
 
     return {
@@ -89,6 +103,9 @@ module.exports = (guild) => {
         destroy,
         clear,
         stop,
+        getSongStartedTimestamp: () => songStartedTimestamp,
+        togglePaused,
+        isPaused: () => audioPlayer.state.status == AudioPlayerStatus.Paused,
         queue,
         __proto__: audioPlayer
     };

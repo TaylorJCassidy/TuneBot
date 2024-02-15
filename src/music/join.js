@@ -2,6 +2,7 @@ const {joinVoiceChannel, getVoiceConnection, entersState, VoiceConnectionStatus}
 const config = require('../configs/music.json');
 const createCustomAudioPlayer = require('./createCustomAudioPlayer');
 const logger = require('../utils/logger')('join');
+const {cancelTimeout} = require('./timeout');
 
 module.exports = (voiceChannel, guild) => {
     return new Promise((resolve, reject) => {
@@ -35,7 +36,7 @@ module.exports = (voiceChannel, guild) => {
                     entersState(connection, VoiceConnectionStatus.Connecting, config.DISCONNECT_TIMEOUT),
                 ]).catch(() => {
                     voiceChannel.client.removeListener('voiceStateUpdate', disconnectListener);
-                    clearTimeout(guild.leaveTimeout);
+                    cancelTimeout(guild);
                     guild.audioPlayer.destroy();
                     guild.audioPlayer = null;
                     connection.destroy();

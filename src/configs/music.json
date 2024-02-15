@@ -16,6 +16,8 @@
     "EMPTY_QUEUE": ":hole: The queue is empty",
     "CURRENT_TRACK_QUEUE": "Current track is: **1**\n",
     "TRACKS_IN_QUEUE": "Tracks currently in queue:\n",
+    "CURRENT_TIME_REMAINING": "Track time remaining: **1**",
+    "QUEUE_TIME_REMAINING": "\nTotal queue time remaining: **1**\n",
     "NOW_LOOPING": "Track is **now** looping",
     "NO_LONGER_LOOPING": "Track is **no longer** looping",
     "CURRENTLY_LOOPING": "Current track **is** looping",
@@ -24,5 +26,9 @@
     "QUEUE_CLEARED": "Cleared queue",
     "QUEUE_ALREADY_CLEAR": "Queue is already clear",
     "INVALID_REMOVE_INDEX": "Not a valid queue position",
-    "REMOVED_FROM_QUEUE": "Removed **1** from queue"
+    "REMOVED_FROM_QUEUE": "Removed **1** from queue",
+    "NOW_PAUSED": "Track is **now** paused",
+    "NO_LONGER_PAUSED": "Track is **no longer** paused",
+    "CURRENTLY_PAUSED": "Current track **is** paused",
+    "NOT_PAUSED": "Current track **is not** paused"
 }

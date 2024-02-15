@@ -1,5 +1,5 @@
 const join = require('../music/join');
-const timeout = require('../music/timeout');
+const {timeout} = require('../music/timeout');
 
 module.exports = {
     name: 'join',
