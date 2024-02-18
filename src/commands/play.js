@@ -5,54 +5,65 @@ const config = require('../configs/music.json');
 const {parseTimeString} = require('../utils/parseTime');
 const logger = require('../utils/logger')('play');
 
-const search = async (limit, args) => (await ytsr(args, {type: 'video', limit, safeSearch: false})).items.filter(t => !t.isLive)[0];
-
 module.exports = {
     name: 'play',
     aliases: ['p'],
     run: function(msg, args, {guild}) {
         join(msg.member.voice.channel, guild)
             .then(async () => {
-                let track;
-                if (ytdl.validateURL(args)) {
-                    const info = await ytdl.getBasicInfo(args);
-                    track = {
-                        url: info.videoDetails.video_url,
-                        title: info.videoDetails.title,
-                        length: info.videoDetails.lengthSeconds
-                    };
-                    guild.audioPlayer.enqueue(track);
-                }
-                else {
-                    let info;
-                    for (let i = 0; i < config.SEARCH_RETRY_LIMIT; i++) {
-                        info = await search(config.INITIAL_SEARCH_SIZE * (i + 1), args);
-                        if (info) {
-                            track = {
-                                url: info.url,
-                                title: info.name,
-                                length: parseTimeString(info.duration)
-                            };
-                            guild.audioPlayer.enqueue(track);
-                            break;
-                        }
-                    }
+                getTrackInfo(args).then((track) => {
+                    if (!track) return msg.channel.send(config.UNABLE_TO_FIND_VIDEO);
+                    const firstAdded = guild.audioPlayer.enqueue(track);
 
-                    if (!info) {
-                        logger(`Unable to find a non-live video for search '${args}'`, 'error');
-                        throw new Error(config.UNABLE_TO_FIND_VIDEO);
+                    if (firstAdded) {
+                        msg.channel.send(config.PLAYING.replace('1', track.title));
                     }
-                }
-
-                if (guild.audioPlayer.queue.length == 1) {
-                    msg.channel.send(config.PLAYING.replace('1', track.title));
-                }
-                else {
-                    msg.channel.send(config.QUEUED.replace('1', track.title));
-                }
+                    else {
+                        msg.channel.send(config.QUEUED.replace('1', track.title));
+                    }
+                })
+                .catch((err) => {
+                    msg.channel.send(config.ERROR_GETTING_VIDEO);
+                    logger(`Error getting video with search '${args}'\n${err}`, 'error');
+                });
             })
             .catch((err) => {
                 msg.channel.send(err.message);
             });
     }
+};
+
+const getTrackInfo = async (search) => {
+    if (ytdl.validateURL(search)) {
+        return ytdl.getBasicInfo(search)
+            .then((info) => ({
+                url: info.videoDetails.video_url,
+                title: info.videoDetails.title,
+                length: info.videoDetails.lengthSeconds
+            }));
+    }
+    
+    return yt_search(search)
+        .then((info) => {
+            if (info) {
+                return {
+                    url: info.url,
+                    title: info.name,
+                    length: parseTimeString(info.duration)
+                };
+            }
+        });
+};
+
+const yt_search = (search, limit = config.INITIAL_SEARCH_SIZE, retryCount = 1) => {
+    return ytsr(search, {type: 'video', limit, safeSearch: false})
+        .then((results) => {
+            const info = results.items.filter(t => !t.isLive).shift();
+            if (info) return info;
+
+            if (retryCount < config.SEARCH_RETRY_LIMIT + 1) {
+                return yt_search(search, limit * (retryCount + 1), retryCount + 1);
+            }
+            return null;
+        });
 };

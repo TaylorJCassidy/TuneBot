@@ -38,14 +38,25 @@ module.exports = (guild) => {
         }
     };
 
+    /**
+     * Enqueues a track to be played
+     * @param {*} track The track to be enqueued
+     * @returns {Boolean} returns true if the track is the first added to an empty queue
+     */
     const enqueue = (track) => {
         queue.push(track);
         if(audioPlayer.state.status != AudioPlayerStatus.Playing) {
             cancelTimeout(guild);
             playHeadOfQueue();
+            return true;
         }
+        return false;
     };
 
+    /**
+     * Skips the current track
+     * @returns {Boolean} returns true if the audioplayer skipped a track
+     */
     const skip = () => {
         if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
             audioPlayer.stop();
@@ -54,16 +65,27 @@ module.exports = (guild) => {
         return false;
     };
 
+    /**
+     * Toggles looping of the track at the head of the queue
+     * @returns returns true if the track is looping
+     */
     const toggleLooping = () => {
         isLooping = !isLooping;
         return isLooping;
     };
 
+    /**
+     * Destroys the audioplayer
+     */
     const destroy = () => {
         audioPlayer.removeListener(AudioPlayerStatus.Idle, audioPlayerIdleListener);
         audioPlayer.stop(true);
     };
 
+    /**
+     * Clears the queue
+     * @returns {Boolean} returns true if the queue was cleared
+     */
     const clear = () => {
         if (queue.length > 1) {
             queue.length = 1;
@@ -72,6 +94,10 @@ module.exports = (guild) => {
         return false;
     };
 
+    /**
+     * Stops the audio player
+     * @returns {Boolean} returns true if the audioplayer was stopped
+     */
     const stop = () => {
         if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
             queue.length = 0; //empty queue
@@ -81,6 +107,10 @@ module.exports = (guild) => {
         return false;
     };
 
+    /**
+     * Toggles the playing of the audioplayer
+     * @returns {Boolean} returns true is the audioplayer is paused
+     */
     const togglePaused = () => {
         if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
             audioPlayer.pause();
