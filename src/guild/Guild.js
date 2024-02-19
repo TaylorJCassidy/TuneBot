@@ -1,5 +1,6 @@
 module.exports = (guildId) => ({
     guildId,
     leaveTimeout: null,
-    audioPlayer: null
+    audioPlayer: null,
+    reply: null
 });

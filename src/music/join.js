@@ -4,7 +4,7 @@ const createCustomAudioPlayer = require('./createCustomAudioPlayer');
 const logger = require('../utils/logger')('join');
 const {cancelTimeout} = require('./timeout');
 
-module.exports = (voiceChannel, guild) => {
+module.exports = (voiceChannel, textChannel, guild) => {
     return new Promise((resolve, reject) => {
         if (!voiceChannel) return reject(new Error(config.NOT_IN_CHANNEL));
         if (!voiceChannel.joinable) return reject(new Error(config.UNABLE_TO_CONNECT));
@@ -25,6 +25,7 @@ module.exports = (voiceChannel, guild) => {
         entersState(connection, VoiceConnectionStatus.Ready, config.JOIN_TIMEOUT).then(() => {
             guild.audioPlayer = createCustomAudioPlayer(guild);
             connection.subscribe(guild.audioPlayer);
+            guild.reply = (text) => textChannel.send(text);
 
             const disconnectListener = () => voiceChannel.members.size == 1 && connection.disconnect();
             voiceChannel.client.on('voiceStateUpdate', disconnectListener);

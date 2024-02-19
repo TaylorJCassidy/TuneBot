@@ -9,10 +9,10 @@ module.exports = {
     name: 'play',
     aliases: ['p'],
     run: function(msg, args, {guild}) {
-        join(msg.member.voice.channel, guild)
+        join(msg.member.voice.channel, msg.channel, guild)
             .then(async () => {
                 getTrackInfo(args).then((track) => {
-                    if (!track) return msg.channel.send(config.UNABLE_TO_FIND_VIDEO);
+                    if (!track) return msg.channel.send(config.UNABLE_TO_FIND_TRACK);
                     const firstAdded = guild.audioPlayer.enqueue(track);
 
                     if (firstAdded) {
@@ -23,7 +23,7 @@ module.exports = {
                     }
                 })
                 .catch((err) => {
-                    msg.channel.send(config.ERROR_GETTING_VIDEO);
+                    msg.channel.send(config.ERROR_GETTING_TRACK);
                     logger(`Error getting video with search '${args}'\n${err}`, 'error');
                 });
             })

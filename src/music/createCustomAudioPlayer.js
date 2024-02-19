@@ -1,6 +1,8 @@
 const { createAudioResource, createAudioPlayer, StreamType, AudioPlayerStatus } = require("@discordjs/voice");
 const ytdl = require('@distube/ytdl-core');
 const {timeout, cancelTimeout} = require('./timeout');
+const config = require('../configs/music.json');
+const logger = require('../utils/logger')('createCustomAudioPlayer');
 
 const options = { 
     quality: [171, 249, 250, 251], //https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
@@ -36,6 +38,11 @@ module.exports = (guild) => {
                 timeout(guild);
             }
         }
+    };
+
+    const audioPlayerErrorListener = (e) => {
+        logger(e, 'error');
+        guild.reply(config.ERROR_PLAYING_TRACK);
     };
 
     /**
@@ -78,6 +85,7 @@ module.exports = (guild) => {
      * Destroys the audioplayer
      */
     const destroy = () => {
+        audioPlayer.removeListener('error', audioPlayerErrorListener);
         audioPlayer.removeListener(AudioPlayerStatus.Idle, audioPlayerIdleListener);
         audioPlayer.stop(true);
     };
@@ -124,6 +132,8 @@ module.exports = (guild) => {
     };
 
     audioPlayer.on(AudioPlayerStatus.Idle, audioPlayerIdleListener);
+
+    audioPlayer.on('error', audioPlayerErrorListener);
 
     return {
         enqueue,

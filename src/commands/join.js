@@ -4,7 +4,7 @@ const {timeout} = require('../music/timeout');
 module.exports = {
     name: 'join',
     run: function(msg, args, {guild}) {
-        join(msg.member.voice.channel, guild)
+        join(msg.member.voice.channel, msg.channel, guild)
             .then(() => {
                 timeout(guild);
             })
