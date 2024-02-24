@@ -21,7 +21,8 @@ module.exports = {
                     content += `${i}. **${track.title}**\n`;
                     queueTotalTime += track.length;
                 }
-                content += config.QUEUE_TIME_REMAINING.replace('1', toTimeString(playingTrackRemainingTime + queueTotalTime));
+                const queueTimeRemainingInfo = (guild.audioPlayer.isLooping() ? config.QUEUE_TIME_REMAINING_LOOPING : toTimeString(playingTrackRemainingTime + queueTotalTime));
+                content += config.QUEUE_TIME_REMAINING.replace('1', queueTimeRemainingInfo);
             }
             content += config.CURRENT_TIME_REMAINING.replace('1', toTimeString(playingTrackRemainingTime));
         }

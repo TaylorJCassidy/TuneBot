@@ -2,7 +2,7 @@
 
 A Discord YouTube streaming bot.
 
-To add this bot to your own Discord server, click [here](TBC).
+To add this bot to your own Discord server, click [here](https://discord.com/api/oauth2/authorize?client_id=886982899897884702&permissions=3213312&scope=bot).
 
 ## Running Locally
 

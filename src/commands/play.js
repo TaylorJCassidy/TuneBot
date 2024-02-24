@@ -9,6 +9,7 @@ module.exports = {
     name: 'play',
     aliases: ['p'],
     run: function(msg, args, {guild}) {
+        if (!args) return msg.channel.send(config.NO_TRACK_SEARCH_PROVIDED);
         join(msg.member.voice.channel, msg.channel, guild)
             .then(async () => {
                 getTrackInfo(args).then((track) => {
