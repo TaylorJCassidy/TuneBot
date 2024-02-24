@@ -1,9 +1,3 @@
-src/app.json
-!src/app.sample.json
-
-icon
-guildJSONs
-
 node_modules
 
 .env

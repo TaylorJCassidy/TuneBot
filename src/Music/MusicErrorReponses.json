@@ -1,6 +1,0 @@
-{
-    "QUEUE_EMPTY": ":x: The queue is empty",
-    "NOT_CONNECTED": ":x: You must be in a voice channel",
-    "INCORRECT_CHANNEL": ":x: You must be in the same voice channel",
-    "NO_TRACK_PLAYING": ":x: There is no track playing"
-}

@@ -10,7 +10,7 @@ module.exports = {
         let m = 1;
 
         while (time.length > 0) {
-            s = s += m * parseInt(time.pop(), 10);
+            s += m * parseInt(time.pop(), 10);
             m *= 60;
         }
         return s;
@@ -33,5 +33,3 @@ module.exports = {
         return `${timeInSec}${time}`;
     }
 };
-
-//3600

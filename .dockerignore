@@ -1,4 +1,6 @@
 .vscode
-config
-icons
+.env
+.eslintrc
+.gitignore
 node_modules
+icon.png

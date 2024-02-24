@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node -r dotenv/config ./src/index.js",
     "start:ci": "node ./src/index.js",
-    "start:docker": "docker build --tag tunebot:local . && docker run --env-file .env tunebot:local",
-    "upload": "docker push 192.168.0.56:5000/tunebot"
+    "start:docker": "docker build --tag tunebot:local . && docker run --env-file .env tunebot:local"
   },
   "dependencies": {
     "@discordjs/voice": "^0.16.1",
