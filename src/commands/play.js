@@ -42,7 +42,7 @@ const getTrackInfo = async (search) => {
             .then((info) => ({
                 url: info.videoDetails.video_url,
                 title: info.videoDetails.title,
-                length: info.videoDetails.lengthSeconds
+                length: parseInt(info.videoDetails.lengthSeconds)
             }));
     }
     
