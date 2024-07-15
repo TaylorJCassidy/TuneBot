@@ -4,6 +4,7 @@
     "LEAVE_TIMEOUT": 300000,
     "INITIAL_SEARCH_SIZE": 3,
     "SEARCH_RETRY_LIMIT": 3,
+    "MAX_VOLUME": 100,
     "NOT_IN_CHANNEL": ":x: Not in voice channel!",
     "UNABLE_TO_CONNECT": ":x: Unable to join the voice channel!",
     "FAILED_TO_CONNECT": ":x: Failed to join the voice channel. Please try again!",
@@ -34,5 +35,7 @@
     "NOW_PAUSED": ":pause_button: Track is **now** paused",
     "NO_LONGER_PAUSED": ":arrow_forward: Track is **no longer** paused",
     "CURRENTLY_PAUSED": ":pause_button: Current track **is** paused",
-    "NOT_PAUSED": ":arrow_forward: Current track **is not** paused"
+    "NOT_PAUSED": ":arrow_forward: Current track **is not** paused",
+    "VOLUME_CHANGED": ":loudspeaker: Volume changed to **1**",
+    "INVALID_VOLUME": ":x: Not a valid volume"
 }

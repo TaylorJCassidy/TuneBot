@@ -15,7 +15,8 @@ module.exports = {
             \n${p}pause     Toggles pausing of current track\
             \n${p}loop      Loops current track\
             \n${p}looping   Shows if current track is looping\
-            \n${p}remove    Removes a track from queue ${p}remove <queue position>`;
+            \n${p}remove    Removes a track from queue ${p}remove <queue position>\
+            \n${p}volume    Changes the volume of the current track ${p}volume <number>`;
 
         msg.channel.send('```' + content + '```');
     }

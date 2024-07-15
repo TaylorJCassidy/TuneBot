@@ -14,11 +14,12 @@ module.exports = (guild) => {
     const queue = [];
     let isLooping = false;
     let songStartedTimestamp;
+    let currentAudioResource;
 
     const play = (track) => {
-        const stream = ytdl(track.url, options);
+        currentAudioResource = createAudioResource(ytdl(track.url, options), {inputType: StreamType.WebmOpus, inlineVolume: true});
         songStartedTimestamp = Date.now();
-        audioPlayer.play(createAudioResource(stream, {inputType: StreamType.WebmOpus}));
+        audioPlayer.play(currentAudioResource);
     };
     
     const playHeadOfQueue = () => {
@@ -74,7 +75,7 @@ module.exports = (guild) => {
 
     /**
      * Toggles looping of the track at the head of the queue
-     * @returns returns true if the track is looping
+     * @returns {boolean} returns true if the track is looping
      */
     const toggleLooping = () => {
         isLooping = !isLooping;
@@ -131,6 +132,16 @@ module.exports = (guild) => {
         return audioPlayer.state.status == AudioPlayerStatus.Paused;
     };
 
+    /**
+     * Sets the volume of the audio resource
+     * @param {Number} volume volume to set
+     */
+    const setVolume = (volume) => {
+        if (audioPlayer.state.status == AudioPlayerStatus.Playing) {
+            currentAudioResource.volume.volume = volume;
+        }
+    };
+
     audioPlayer.on(AudioPlayerStatus.Idle, audioPlayerIdleListener);
 
     audioPlayer.on('error', audioPlayerErrorListener);
@@ -146,6 +157,8 @@ module.exports = (guild) => {
         getSongStartedTimestamp: () => songStartedTimestamp,
         togglePaused,
         isPaused: () => audioPlayer.state.status == AudioPlayerStatus.Paused,
+        isPlaying: () => audioPlayer.state.status == AudioPlayerStatus.Playing,
+        setVolume,
         queue,
         __proto__: audioPlayer
     };
