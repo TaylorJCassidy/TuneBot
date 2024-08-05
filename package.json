@@ -6,15 +6,15 @@
   "scripts": {
     "start": "node -r dotenv/config ./src/index.js",
     "start:ci": "node ./src/index.js",
-    "start:docker": "docker build --tag tunebot:local . && docker run --env-file .env tunebot:local --rm"
+    "start:docker": "docker build --tag tunebot:local . && docker run --rm --env-file .env tunebot:local"
   },
   "dependencies": {
     "@discordjs/voice": "^0.17.0",
-    "@distube/ytdl-core": "^4.13.5",
+    "@distube/ytdl-core": "^4.14.2",
     "@distube/ytsr": "^2.0.4",
     "discord.js": "^14.15.3",
     "ffmpeg-static": "^5.2.0",
-    "libsodium-wrappers": "^0.7.13",
+    "libsodium-wrappers": "^0.7.14",
     "opusscript": "^0.1.1"
   },
   "devDependencies": {

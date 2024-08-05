@@ -5,7 +5,7 @@ const config = require('../configs/music.json');
 const logger = require('../utils/logger')('createCustomAudioPlayer');
 
 const options = { 
-    quality: [171, 249, 250, 251], //https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
+    quality: [171, 249, 250, 251, 139, 140, 141], //https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
     highWaterMark: 1 << 24
 };
 
