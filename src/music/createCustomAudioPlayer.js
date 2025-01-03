@@ -17,7 +17,7 @@ module.exports = (guild) => {
     let currentAudioResource;
 
     const play = (track) => {
-        currentAudioResource = createAudioResource(ytdl(track.url, options), {inputType: StreamType.WebmOpus, inlineVolume: true});
+        currentAudioResource = createAudioResource(ytdl(track.url, options), {inputType: StreamType.WebmOpus, inlineVolume: true, playerClients: ["IOS", "WEB_CREATOR"]});
         songStartedTimestamp = Date.now();
         audioPlayer.play(currentAudioResource);
     };
