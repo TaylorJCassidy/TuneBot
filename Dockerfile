@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM node:jod-alpine
 ENV NODE_ENV=production
 WORKDIR /tunebot
 COPY package*.json ./
