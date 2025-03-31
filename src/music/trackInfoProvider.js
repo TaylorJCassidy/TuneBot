@@ -1,6 +1,7 @@
-const trackInfoProvider = require('./distubeTrackInfoProvider');
+const distubeTrackInfoProvider = require('./distubeTrackInfoProvider');
+const ytDlpTrackInfoProvider = require('./yt-dlp/ytDlpTrackInfoProvider');
 
 module.exports = {
-    getTrackStream: (url) => trackInfoProvider.getTrackStream(url),
-    getTrackInfo: async (search) => trackInfoProvider.getTrackInfo(search)
+    getTrackStream: (url) => ytDlpTrackInfoProvider.getTrackStream(url),
+    getTrackInfo: async (search) => distubeTrackInfoProvider.getTrackInfo(search)
 };
