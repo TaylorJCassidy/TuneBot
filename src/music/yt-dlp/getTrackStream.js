@@ -14,18 +14,22 @@ const options = [
     '-q', //be quiet
     `-x`, //audio only
     `-f ${formats.join('/')}`, //formats in order of priority
+    '--extractor-args "youtube:player-client=tv,web_embedded,web_music"',
     `--ffmpeg-location ${ffmpeg}`,
-    '--buffer-size 128k'
+    '--js-runtimes node',
+    '--buffer-size 16k'
 ];
 
 module.exports = (url) => {
     if (!isValidHttpUrl(url)) return;
 
-    const ytDlp = spawn('./src/music/yt-dlp/yt-dlp', [...options, url], {shell: true});
+    const ytDlp = spawn('./src/yt_dlp', [...options, url], {shell: true});
 
     ytDlp.stderr.on('data', data => {
+        console.log(data.toString());
         if (!ytDlp.stdout.destroyed) {
             ytDlp.stdout.emit('error', data);
+            ytDlp.kill();
         }
     });
 
